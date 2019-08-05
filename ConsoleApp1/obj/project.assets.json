@@ -687,11 +687,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\ZFleezy\\Documents\\SNF Task\\SNF Tasks\\EmployeeSalaryProcessor\\SNF-Employees\\ConsoleApp1\\ConsoleApp1.csproj",
+      "projectUniqueName": "D:\\ZFleezy\\Documents\\SNF Task\\SNF Tasks\\SNF-Employees Git\\EmployeeSalaryProcessorRefinied\\ConsoleApp1\\ConsoleApp1.csproj",
       "projectName": "ConsoleApp1",
-      "projectPath": "D:\\ZFleezy\\Documents\\SNF Task\\SNF Tasks\\EmployeeSalaryProcessor\\SNF-Employees\\ConsoleApp1\\ConsoleApp1.csproj",
+      "projectPath": "D:\\ZFleezy\\Documents\\SNF Task\\SNF Tasks\\SNF-Employees Git\\EmployeeSalaryProcessorRefinied\\ConsoleApp1\\ConsoleApp1.csproj",
       "packagesPath": "C:\\Users\\ZFleezy\\.nuget\\packages\\",
-      "outputPath": "D:\\ZFleezy\\Documents\\SNF Task\\SNF Tasks\\EmployeeSalaryProcessor\\SNF-Employees\\ConsoleApp1\\obj\\",
+      "outputPath": "D:\\ZFleezy\\Documents\\SNF Task\\SNF Tasks\\SNF-Employees Git\\EmployeeSalaryProcessorRefinied\\ConsoleApp1\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
