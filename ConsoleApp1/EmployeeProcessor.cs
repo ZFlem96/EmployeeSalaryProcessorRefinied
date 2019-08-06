@@ -253,7 +253,8 @@ namespace ConsoleApp1
             topEmployeesAlphabetically = topEmployees.OrderBy(x => x.FirstName).ToList();
             return topEmployeesAlphabetically;
         }
-
+        //median time worked, median net pay, and total state taxes 
+        // output should be state, median time worked, median net pay, state taxes
         public void getAllStatesByMedian() {
             if (employees.Count == 0)
             {
@@ -263,7 +264,73 @@ namespace ConsoleApp1
             string file = fileDir + fileName;
             List<string> lines = new List<string>();
             string line = "";
+            int medianHours = getMedianHour();
+            double medianNetPay = getMedianNetPay();
+            double totalStateTaxes = getTotalStateTaxes();
+            List<Employee> medianEmployees = new List<Employee>();
+            double stateTax = 0;
+            double percentageOfTotalStateTaxes = 0;
+            string percentageOfTSTString = "";
+            for (int x = 0; x < employees.Count;x++)
+            {
+                Employee tmp = employees[x];
+                if (tmp.Hours == medianHours)
+                {
+                    if (tmp.NetSalary == medianNetPay)
+                    {
+                        stateTax = getStateTax(tmp.Residence);
+                        percentageOfTotalStateTaxes = stateTax/totalStateTaxes;
+                        percentageOfTotalStateTaxes = Math.Round(percentageOfTotalStateTaxes, 2);
+                        percentageOfTSTString = percentageOfTotalStateTaxes.ToString("#0.##%");
+                        line = tmp.Residence + ", " + medianHours + ", " + medianNetPay + ", " + percentageOfTSTString;
+                        lines.Add(line);
+                    }
+                }
+            }
             File.WriteAllLines(file, lines);
+        }
+
+        private double getTotalStateTaxes()
+        {
+            double totalStateTax = 0;
+            for (int x = 0; x < employees.Count; x++)
+            {
+                Employee tmp = employees[x];
+                totalStateTax += getStateTax(tmp.Residence);
+            }
+            return totalStateTax;
+        }
+
+        private double getMedianNetPay()
+        {
+            double medianNetPay = 0;
+            List<Employee> original = employees;
+            List<Employee> sortedByNetPay = original.OrderBy(x => x.NetSalary).ToList();
+            List<double> allNetPay = new List<double>();
+            for (int x = 0; x < sortedByNetPay.Count; x++)
+            {
+                Employee tmp = sortedByNetPay[x];
+                allNetPay.Add(tmp.NetSalary);
+            }
+            int median = allNetPay.Count / 2;
+            medianNetPay = allNetPay[median];
+            return medianNetPay;
+        }
+
+        private int getMedianHour()
+        {
+            int medianHour = 0;
+            List<Employee> original = employees;
+            List<Employee> sortedByHours = original.OrderBy(x => x.Hours).ToList();
+            List<int> allHours = new List<int>();
+            for (int x = 0; x < sortedByHours.Count;x++)
+            {
+                Employee tmp = sortedByHours[x];
+                allHours.Add(tmp.Hours);
+            }
+            int median = allHours.Count / 2;
+            medianHour = allHours[median];
+            return medianHour;
         }
 
         public Employee GetByEmployeeId(string employeeId)
