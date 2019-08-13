@@ -9,7 +9,10 @@ namespace ConsoleApp1
     class EmployeeProcessor
     {
         private List<Employee> employees;
-        private string fileDir = "../Files/";
+        private string[] stateTaxCheck1 = { "UT", "WY", "NV" };
+        private string[] stateTaxCheck2 = { "CO", "ID", "AZ", "OR" };
+        private string[] stateTaxCheck3 = { "WA", "NM", "TX" };
+        private string fileDir = "./Files/";
         private static double federalTax = .15;
         private List<Employee> Employees { get => employees; set => employees = value; }
 
@@ -50,7 +53,7 @@ namespace ConsoleApp1
                     grossSalary = salary;
                 }
                 employee.GrossSalary = grossSalary;
-                netSalary = processSalary(salary, residence);
+                netSalary = processSalary(grossSalary, residence);
                 employee.NetSalary = netSalary;
                 employees.Add(employee);
             }
@@ -63,16 +66,15 @@ namespace ConsoleApp1
             double stateTax = getStateTax(residence);
             totalTax += stateTax;
             double taxCut = salary * totalTax;
+            taxCut = formatValue(taxCut);
             processedSalary = salary - taxCut;
+            processedSalary = formatValue(processedSalary);
             return processedSalary;
         }
 
         private double getStateTax(string residence)
         {
             double stateTax = 0;
-            string[] stateTaxCheck1 = { "UT","WY","NV" };
-            string[] stateTaxCheck2 = { "CO", "ID", "AZ", "OR " };
-            string[] stateTaxCheck3 = { "WA", "NM", "TX" };
             for (int x = 0;x<stateTaxCheck1.Length;x++)
             {
                 if (stateTaxCheck1[x].Equals(residence))
@@ -111,13 +113,15 @@ namespace ConsoleApp1
             double regularOvertimeRate = 1.5, extendedOvertimeRate = 1.75;
             if (hours <= regularHours)
             {
-                processedSalary = (salary * hours); 
+                processedSalary = (salary * hours);
             } else
             {
                 int totalOvertime = hours - regularHours;
                 int timeAndHalfHours = 0, extendedTime = 0;
-                double salaryRegularOT = salary+(salary*regularOvertimeRate);
-                double salaryExtendedOT = salary + (salary * extendedOvertimeRate);
+                double salaryRegularOT = salary * regularOvertimeRate;
+                salaryRegularOT = formatValue(salaryRegularOT);
+                double salaryExtendedOT = salary * extendedOvertimeRate;
+                salaryExtendedOT = formatValue(salaryExtendedOT);
                 if (totalOvertime > 10)
                 {
                     timeAndHalfHours = 10;
@@ -127,24 +131,49 @@ namespace ConsoleApp1
                     timeAndHalfHours = hours - regularHours;
                     
                 }
+                
                 int remainder = hours - totalOvertime;
                 double processedRegurlar = (salary * remainder);
+                processedRegurlar = formatValue(processedRegurlar);
                 double processedRegularOvertime = (salaryRegularOT * timeAndHalfHours);
+                processedRegularOvertime = formatValue(processedRegularOvertime);
                 double processExtededOvertime = (salaryExtendedOT * extendedTime);
+                processExtededOvertime = formatValue(processExtededOvertime);
                 double processedOvertime = processedRegularOvertime + processExtededOvertime;
+                processedOvertime = formatValue(processedOvertime);
                 processedSalary = processedRegurlar + processedOvertime;
             }
+            processedSalary = formatValue(processedSalary);
             return processedSalary;
         }
+
+        private double formatValue(double processedRegurlar)
+        {
+            string format = ""+processedRegurlar;
+            processedRegurlar = double.Parse(format);
+            string[] formatArray = format.Split('.');
+            if (formatArray.Length==2)
+            {
+                int length = formatArray[1].Length;
+                bool MoreThan2Decimals = length > 2;
+                if (MoreThan2Decimals)
+                {
+                    processedRegurlar = double.Parse(string.Format("{0:0.00}", processedRegurlar));
+                }
+            }
+            return processedRegurlar;
+        }
+        //make sure its by highest gross
         //output: employee id, first name, last name, gross pay, federal tax, state tax, net pay
         public void getProcessedEmployees() {
-            if (employees.Count == 0)
+            if (employees == null)
             {
                 ProcessEmployees();
             }
             string fileName = "ProcessedEmployees.txt";
             string file = fileDir + fileName;
-            List<Employee> employeesListedByGross = getEmployeeListByGross();
+            List<Employee> employeesListedByGross = employees.OrderBy(x => x.GrossSalary).ToList();
+                //getEmployeeListByGross();
             List<string> lines = new List<string>();
             string line = "";
             string fedTax = "15%";
@@ -175,39 +204,15 @@ namespace ConsoleApp1
             File.WriteAllLines(file, lines);
         }
 
-        private List<Employee> getEmployeeListByGross()
-        {
-            List<Employee> tmpList = employees;
-            List<Employee> employeesListedByGross = new List<Employee>();
-            double largestGross = 0;
-            int employeeIndex = 0;
-            while (tmpList.Count>0)
-            {
-                largestGross = tmpList[0].GrossSalary;
-                employeeIndex = 0;
-                for (int x = 0; x < tmpList.Count;x++)
-                {
-                    Employee tmp = tmpList[x];
-                    if (largestGross < tmp.GrossSalary)
-                    {
-                        largestGross = tmp.GrossSalary;
-                        employeeIndex = x;
-                    }
-                }
-                employeesListedByGross.Add(tmpList[employeeIndex]);
-                tmpList.RemoveAt(employeeIndex);
-            }
-            return employeesListedByGross;
-        }
         //output: first name, last name, number of years worked, gross pay
         public void getTopEarningEmployees() {
-            if (employees.Count == 0)
+            if (employees == null)
             {
                 ProcessEmployees();
             }
             string fileName = "TopEarningEmployees.txt";
             string file = fileDir + fileName;
-            List<Employee> employeesListedByGross = getEmployeeListByGross();
+            List<Employee> employeesListedByGross = employees.OrderBy(x => x.GrossSalary).ToList();
             List<Employee> topEmployees = new List<Employee>();
             List<string> lines = new List<string>();
             string line = "";
@@ -218,7 +223,7 @@ namespace ConsoleApp1
                 Employee e = employeesListedByGross[x];
                 topEmployees.Add(e);
             }
-            List<Employee> topEmployeesAlphabetically = getTopEmployeesAlphabetically(topEmployees);
+            List<Employee> topEmployeesAlphabetically = employees.OrderBy(x => x.LastName).OrderBy(x => x.FirstName).ToList();
             int currentYear = DateTime.Now.Year;
             string currentYearTxt = ""+currentYear;
             int currentYearLast2Digits = int.Parse("" +currentYearTxt[currentYearTxt.Length-2] + currentYearTxt[currentYearTxt.Length - 1]);
@@ -246,17 +251,10 @@ namespace ConsoleApp1
             File.WriteAllLines(file, lines);
         }
 
-        private List<Employee> getTopEmployeesAlphabetically(List<Employee> topEmployees)
-        {
-            List<Employee> topEmployeesAlphabetically = new List<Employee>();
-            List<Employee> topEmployeesLast = topEmployees.OrderBy(x => x.LastName).ToList();
-            topEmployeesAlphabetically = topEmployees.OrderBy(x => x.FirstName).ToList();
-            return topEmployeesAlphabetically;
-        }
         //median time worked, median net pay, and total state taxes 
         // output should be state, median time worked, median net pay, state taxes
-        public void getAllStatesByMedian() {
-            if (employees.Count == 0)
+        public void getAllStatesWithMedianData() {
+            if (employees == null)
             {
                 ProcessEmployees();
             }
@@ -264,28 +262,22 @@ namespace ConsoleApp1
             string file = fileDir + fileName;
             List<string> lines = new List<string>();
             string line = "";
-            int medianHours = getMedianHour();
-            double medianNetPay = getMedianNetPay();
+            string state = "";
+            int medianHours = 0;
+            double medianNetPay = 0;
             double totalStateTaxes = getTotalStateTaxes();
-            List<Employee> medianEmployees = new List<Employee>();
-            double stateTax = 0;
-            double percentageOfTotalStateTaxes = 0;
-            string percentageOfTSTString = "";
-            for (int x = 0; x < employees.Count;x++)
+            string totalTaxesFromStates = "";
+            List<String> states = getAllStates();
+            List<Employee> employeesFromState = new List<Employee>();
+            for (int x = 0; x < states.Count;x++)
             {
-                Employee tmp = employees[x];
-                if (tmp.Hours == medianHours)
-                {
-                    if (tmp.NetSalary == medianNetPay)
-                    {
-                        stateTax = getStateTax(tmp.Residence);
-                        percentageOfTotalStateTaxes = stateTax/totalStateTaxes;
-                        percentageOfTotalStateTaxes = Math.Round(percentageOfTotalStateTaxes, 2);
-                        percentageOfTSTString = percentageOfTotalStateTaxes.ToString("#0.##%");
-                        line = tmp.Residence + ", " + medianHours + ", " + medianNetPay + ", " + percentageOfTSTString;
-                        lines.Add(line);
-                    }
-                }
+                state = states[x];
+                employeesFromState = getAllEmployeesFromState(state);
+                medianHours = getMedianHourByState(employeesFromState);
+                medianNetPay = getMedianNetPayByState(employeesFromState);
+                totalTaxesFromStates = getTotalStateTaxesByState(totalStateTaxes,state,employeesFromState);
+                    line = state + ", " + medianHours + ", " + medianNetPay + ", " + totalTaxesFromStates;
+                    lines.Add(line);
             }
             File.WriteAllLines(file, lines);
         }
@@ -301,10 +293,54 @@ namespace ConsoleApp1
             return totalStateTax;
         }
 
-        private double getMedianNetPay()
+        private List<Employee> getAllEmployeesFromState(string state)
+        {
+            List<Employee> employeesFromState = new List<Employee>();
+            Employee e = new Employee();
+            for (int x = 0; x < employees.Count;x++)
+            {
+                e = employees[x];
+                if (e.Residence.Equals(state))
+                {
+                    employeesFromState.Add(e);
+                }
+            }
+            return employeesFromState;
+        }
+
+        private List<string> getAllStates()
+        {
+            List<string> states = new List<string>();
+            for (int x = 0; x < stateTaxCheck1.Length;x++)
+            {
+                states.Add(stateTaxCheck1[x]);
+            }
+            for (int x = 0; x < stateTaxCheck2.Length; x++)
+            {
+                states.Add(stateTaxCheck2[x]);
+            }
+            for (int x = 0; x < stateTaxCheck3.Length; x++)
+            {
+                states.Add(stateTaxCheck3[x]);
+            }
+            states.Sort();
+            return states;
+        }
+
+        private string getTotalStateTaxesByState(double total,string state, List<Employee> employeesFromState)
+        {
+            double result = 0;
+            double stateTax = getStateTax(state);
+            double totalFromState = stateTax*employeesFromState.Count;
+            result = totalFromState / total;
+            result = formatValue(result);
+            string percentageOfTSTString = result.ToString("#0.##%");
+            return percentageOfTSTString;
+        }
+
+        private double getMedianNetPayByState(List<Employee> original)
         {
             double medianNetPay = 0;
-            List<Employee> original = employees;
             List<Employee> sortedByNetPay = original.OrderBy(x => x.NetSalary).ToList();
             List<double> allNetPay = new List<double>();
             for (int x = 0; x < sortedByNetPay.Count; x++)
@@ -317,10 +353,9 @@ namespace ConsoleApp1
             return medianNetPay;
         }
 
-        private int getMedianHour()
+        private int getMedianHourByState(List<Employee> original)
         {
             int medianHour = 0;
-            List<Employee> original = employees;
             List<Employee> sortedByHours = original.OrderBy(x => x.Hours).ToList();
             List<int> allHours = new List<int>();
             for (int x = 0; x < sortedByHours.Count;x++)
