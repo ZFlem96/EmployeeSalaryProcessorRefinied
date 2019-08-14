@@ -16,7 +16,7 @@ namespace ConsoleApp1
         private double salary;
         private double grossSalary;
         private double netSalary;
-        private string startDate;
+        private DateTime startDate;
         private string residence;
         private int hours;
 
@@ -27,10 +27,14 @@ namespace ConsoleApp1
         public double Salary { get => salary; set => salary = value; }
         public double GrossSalary { get => grossSalary; set => grossSalary = value; }
         public double NetSalary { get => netSalary; set => netSalary = value; }
-        public string StartDate { get => startDate; set => startDate = value; }
+        public DateTime StartDate { get => startDate; set => startDate = value; }
         public string Residence { get => residence; set => residence = value; }
         public int Hours { get => hours; set => hours = value; }
-
+        override
+        public string ToString() {
+            return this.Id + ", " + this.FirstName + ", " + this.LastName + ", " + this.Hours + ", " + this.Residence + ", "
++ this.StartDate + ", " + this.Type + ", " + this.Salary + ", " + this.GrossSalary + ", " + this.NetSalary;
+        }
         public Employee() { }
         
 

@@ -14,8 +14,7 @@ namespace ConsoleApp1
         private string[] stateTaxCheck3 = { "WA", "NM", "TX" };
         private string fileDir = "./Files/";
         private static double federalTax = .15;
-        private List<Employee> Employees { get => employees; set => employees = value; }
-
+        
 
         private void ProcessEmployees()
         {
@@ -33,7 +32,7 @@ namespace ConsoleApp1
                 string lastName = employeeLine[2];
                 char type = employeeLine[3].ToCharArray()[0];
                 double salary = double.Parse(employeeLine[4]);
-                string startDate = employeeLine[5];
+                DateTime startDate = DateTime.Parse(employeeLine[5]);
                 string residence = employeeLine[6];
                 int hours = int.Parse(employeeLine[7]);
                 employee.Id = id;
@@ -172,8 +171,7 @@ namespace ConsoleApp1
             }
             string fileName = "ProcessedEmployees.txt";
             string file = fileDir + fileName;
-            List<Employee> employeesListedByGross = employees.OrderBy(x => x.GrossSalary).ToList();
-                //getEmployeeListByGross();
+            List<Employee> employeesListedByGross = employees.OrderByDescending(x => x.GrossSalary).ToList();
             List<string> lines = new List<string>();
             string line = "";
             string fedTax = "15%";
@@ -212,38 +210,27 @@ namespace ConsoleApp1
             }
             string fileName = "TopEarningEmployees.txt";
             string file = fileDir + fileName;
-            List<Employee> employeesListedByGross = employees.OrderBy(x => x.GrossSalary).ToList();
+            List<Employee> employeesListedByGross = employees.OrderByDescending(x => x.GrossSalary).ToList();
             List<Employee> topEmployees = new List<Employee>();
             List<string> lines = new List<string>();
             string line = "";
-            int topLimit = 15;
-            int top = employeesListedByGross.Count / topLimit;
+            double topLimit = .15;
+            double top =   employeesListedByGross.Count*topLimit;
             for (int x = 0; x < top;x++)
             {
                 Employee e = employeesListedByGross[x];
                 topEmployees.Add(e);
             }
-            List<Employee> topEmployeesAlphabetically = employees.OrderBy(x => x.LastName).OrderBy(x => x.FirstName).ToList();
+            List<Employee> topEmployeesAlphabetically = topEmployees.OrderByDescending(x => x.GrossSalary).OrderByDescending(x => x.StartDate).OrderBy(x => x.LastName).OrderBy(x => x.FirstName).ToList();
             int currentYear = DateTime.Now.Year;
             string currentYearTxt = ""+currentYear;
             int currentYearLast2Digits = int.Parse("" +currentYearTxt[currentYearTxt.Length-2] + currentYearTxt[currentYearTxt.Length - 1]);
             int startYear = 0;
-            int startYear2Digits = 0;
             int totalYears = 0;
-            string startYearTxt = "";
             for (int x = 0; x < topEmployeesAlphabetically.Count;x++)
             {
                 Employee e = topEmployeesAlphabetically[x];
-                startYearTxt = ""+e.StartDate[e.StartDate.Length - 2] + e.StartDate[e.StartDate.Length - 1];
-                startYear2Digits = int.Parse(startYearTxt);
-                if (startYear2Digits < currentYearLast2Digits)
-                {
-                    startYearTxt = 20 + startYearTxt;
-                } else if (startYear2Digits > currentYearLast2Digits)
-                {
-                    startYearTxt = 19 + startYearTxt;
-                }
-                startYear = int.Parse(startYearTxt);
+                startYear = e.StartDate.Year;
                 totalYears = currentYear - startYear;
                 line = e.FirstName + ", " + e.LastName + ", " + totalYears + " year(s), " + e.GrossSalary;
                 lines.Add(line);
@@ -276,8 +263,8 @@ namespace ConsoleApp1
                 medianHours = getMedianHourByState(employeesFromState);
                 medianNetPay = getMedianNetPayByState(employeesFromState);
                 totalTaxesFromStates = getTotalStateTaxesByState(totalStateTaxes,state,employeesFromState);
-                    line = state + ", " + medianHours + ", " + medianNetPay + ", " + totalTaxesFromStates;
-                    lines.Add(line);
+                line = state + ", " + medianHours + ", " + medianNetPay + ", " + totalTaxesFromStates;
+                lines.Add(line);
             }
             File.WriteAllLines(file, lines);
         }
